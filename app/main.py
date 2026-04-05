@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.models.ticket import Ticket
+from app.models.user import User
 from app.database import Base, engine
 from app.routes.tickets import router
 
