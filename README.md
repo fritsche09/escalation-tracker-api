@@ -95,3 +95,11 @@ Response body:
   "updated_at": "2026-03-29T20:13:16.969111"
 }
 ```
+
+## Running Tests
+
+1. Create a test database in PostgreSQL called `escalation_tracker_test`
+2. Run the test suite:
+```bash
+   pytest tests/ -v
+```
