@@ -11,7 +11,7 @@ router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
 @router.post("", response_model=TicketResponse, status_code=201)
 def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    new_ticket = Ticket(**ticket.model_dump())
+    new_ticket = Ticket(**ticket.model_dump(), user_id=user.id)
     db.add(new_ticket)
     db.commit()
     db.refresh(new_ticket)
