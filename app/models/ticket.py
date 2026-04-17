@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -12,6 +13,8 @@ class Ticket(Base):
     priority = Column(String(50), default="low")
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="tickets")
 
 
     

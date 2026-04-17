@@ -1,4 +1,5 @@
 from app.database import Base
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.sql import func
 
@@ -11,3 +12,4 @@ class User(Base):
     hashed_password = Column(String(100), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+    tickets = relationship("Ticket", back_populates="user")
