@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse, Token
 from app.database import get_db
 from sqlalchemy.orm import Session
-from jose import jwt
+from jose import jwt, JWTError
 from datetime import timezone, datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -18,6 +19,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -25,6 +27,25 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+def get_current_user(
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)
+):
+    try:
+        data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = data.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    return user
 
 @router.post("/register", response_model=UserResponse, status_code=201)
 def authorize(user: UserRegister, db: Session=Depends(get_db)):
