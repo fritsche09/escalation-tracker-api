@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse, Token
@@ -69,8 +69,8 @@ def authorize(user: UserRegister, db: Session=Depends(get_db)):
     return new_user
 
 @router.post("/login", response_model=Token)
-def login(user: UserLogin, db: Session=Depends(get_db)):
-    get_user = db.query(User).filter(User.email == user.email).first()
+def login(user: OAuth2PasswordRequestForm=Depends(OAuth2PasswordRequestForm), db: Session=Depends(get_db)):
+    get_user = db.query(User).filter(User.email == user.username).first()
 
     if not get_user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
