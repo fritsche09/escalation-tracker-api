@@ -24,9 +24,14 @@ def read_tickets(
     limit: int = Query(5, ge=1, le=100), 
     offset: int = Query(0, ge=0), 
     db: Session = Depends(get_db),
+    by_user: bool = False,
     user: User = Depends(get_current_user)
     ):
+    
     query = db.query(Ticket)
+
+    if by_user:
+        query = query.filter(Ticket.user_id == user.id)
 
     if status:
         query = query.filter(Ticket.status == status.lower())
