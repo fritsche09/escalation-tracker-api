@@ -48,7 +48,7 @@ def get_current_user(
     return user
 
 @router.post("/register", response_model=UserResponse, status_code=201)
-def authorize(user: UserRegister, db: Session=Depends(get_db)):
+def register(user: UserRegister, db: Session=Depends(get_db)):
     check_existing_email = db.query(User).filter(User.email == user.email).first()
 
     if check_existing_email:
