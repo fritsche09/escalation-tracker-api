@@ -57,6 +57,9 @@ def update_ticket(ticket_id: int, ticket: TicketUpdate, db: Session = Depends(ge
 
     if not current_ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    if current_ticket.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to modify this ticket")
 
     update_data = ticket.model_dump(exclude_unset=True)
     
@@ -70,8 +73,13 @@ def update_ticket(ticket_id: int, ticket: TicketUpdate, db: Session = Depends(ge
 @router.delete("/{ticket_id}", status_code=204)
 def delete_ticket(ticket_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    if ticket.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to modify this ticket")
+    
     db.delete(ticket)
     db.commit()
     return None
